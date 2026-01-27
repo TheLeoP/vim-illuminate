@@ -16,16 +16,16 @@ local visual_modes = {
 }
 
 function M.select()
-  local bufnr = vim.api.nvim_get_current_buf()
+  local buf = vim.api.nvim_get_current_buf()
   local winid = vim.api.nvim_get_current_win()
   local cursor_pos = util.get_cursor_pos(winid)
 
-  if #ref.buf_get_references(bufnr) == 0 then return end
+  if #ref.buf_get_references(buf) == 0 then return end
 
-  local i = ref.bisect_left(ref.buf_get_references(bufnr), cursor_pos)
-  if i > #ref.buf_get_references(bufnr) then return end
+  local i = ref.bisect_left(ref.buf_get_references(buf), cursor_pos)
+  if i > #ref.buf_get_references(buf) then return end
 
-  local reference = ref.buf_get_references(bufnr)[i]
+  local reference = ref.buf_get_references(buf)[i]
   vim.api.nvim_win_set_cursor(winid, { reference[1][1] + 1, reference[1][2] })
   if not visual_modes[vim.api.nvim_get_mode().mode] then
     vim.cmd "normal! v"

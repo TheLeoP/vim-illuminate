@@ -1,19 +1,19 @@
 local M = {}
 
+---@type {[integer]: true}
 local buf_attached = {}
 
--- get_node is builtin in v0.9+, get_node_at_cursor is for older versions
-local get_node_at_cursor = vim.treesitter.get_node or require("nvim-treesitter.ts_utils").get_node_at_cursor
-function M.get_references(bufnr)
+---@param buf integer
+function M.get_references(buf)
   local ok, locals = pcall(require, "nvim-treesitter.locals")
   if not ok then return end
 
-  local node_at_point = get_node_at_cursor()
+  local node_at_point = vim.treesitter.get_node()
   if not node_at_point then return end
 
   local refs = {}
-  local def_node, scope, kind = locals.find_definition(node_at_point, bufnr)
-  local usages = locals.find_usages(def_node, scope, bufnr)
+  local def_node, scope, kind = locals.find_definition(node_at_point, buf)
+  local usages = locals.find_usages(def_node, scope, buf)
   for _, node in ipairs(usages) do
     if kind ~= nil and node == def_node then
       local range = { def_node:range() }
@@ -35,16 +35,16 @@ function M.get_references(bufnr)
   return refs
 end
 
-function M.is_ready(bufnr)
-  return buf_attached[bufnr] and vim.api.nvim_buf_get_option(bufnr, "filetype") ~= "yaml"
+function M.is_ready(buf)
+  return buf_attached[buf] and vim.bo[buf].filetype ~= "yaml"
 end
 
-function M.attach(bufnr)
-  buf_attached[bufnr] = true
+function M.attach(buf)
+  buf_attached[buf] = true
 end
 
-function M.detach(bufnr)
-  buf_attached[bufnr] = nil
+function M.detach(buf)
+  buf_attached[buf] = nil
 end
 
 return M
