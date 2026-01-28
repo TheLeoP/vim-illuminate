@@ -6,12 +6,16 @@ local REFERENCES_INDEX = 3
 ---@type {[integer]: [integer, function, illuminate.Ref[]|nil]}
 local bufs = {}
 
+---@param buf integer
+---@param line integer
+---@param col integer
+---@param offset_encoding 'utf-8'|'utf-16'|'utf-32'
 local function get_line_byte_from_position(buf, line, col, offset_encoding)
   if col == 0 then return col end
 
   local lines = vim.api.nvim_buf_get_lines(buf, line, line + 1, false)
   if not lines or #lines == 0 then return col end
-  return vim.str_byteindex(lines[1], col, offset_encoding, true)
+  return vim.str_byteindex(lines[1], offset_encoding, col, false)
 end
 
 function M.get_references(buf)
